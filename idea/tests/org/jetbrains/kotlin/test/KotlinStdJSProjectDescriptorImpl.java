@@ -29,6 +29,7 @@ import org.jetbrains.kotlin.idea.test.ConfigLibraryUtil;
 import org.jetbrains.kotlin.idea.test.KotlinStdJSProjectDescriptor;
 
 public class KotlinStdJSProjectDescriptorImpl extends KotlinStdJSProjectDescriptor {
+    @NotNull
     @Override
     public ModuleType getModuleType() {
         return StdModuleTypes.JAVA;
