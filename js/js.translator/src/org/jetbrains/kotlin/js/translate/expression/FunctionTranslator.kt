@@ -26,6 +26,7 @@ import org.jetbrains.kotlin.js.backend.ast.JsScope
 import org.jetbrains.kotlin.js.backend.ast.metadata.descriptor
 import org.jetbrains.kotlin.js.backend.ast.metadata.functionDescriptor
 import org.jetbrains.kotlin.js.backend.ast.metadata.hasDefaultValue
+import org.jetbrains.kotlin.js.backend.ast.metadata.owningInlineFunction
 import org.jetbrains.kotlin.js.translate.context.Namer
 import org.jetbrains.kotlin.js.translate.context.TranslationContext
 import org.jetbrains.kotlin.js.translate.reference.CallExpressionTranslator.shouldBeInlined
@@ -101,9 +102,15 @@ fun TranslationContext.translateFunction(declaration: KtDeclarationWithBody, fun
 }
 
 fun TranslationContext.wrapWithInlineMetadata(function: JsFunction, descriptor: FunctionDescriptor): JsExpression {
-    return if (shouldBeInlined(descriptor, this) && descriptor.isEffectivelyPublicApi) {
-        val metadata = InlineMetadata.compose(function, descriptor, this)
-        metadata.functionWithMetadata
+    return if (shouldBeInlined(descriptor, this)) {
+        if (descriptor.isEffectivelyPublicApi) {
+            val metadata = InlineMetadata.compose(function, descriptor, this)
+            metadata.functionWithMetadata
+        }
+        else {
+            inlineFunctionContext!!.declarationsBlock.statements.forEach { it.owningInlineFunction = function }
+            function
+        }
     }
     else {
         function
